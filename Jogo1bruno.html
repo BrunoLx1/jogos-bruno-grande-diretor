@@ -1,0 +1,124 @@
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// Tamanho da bola e raquetes
+const ballRadius = 10;
+const paddleWidth = 10;
+const paddleHeight = 100;
+
+// Posições iniciais da bola e das raquetes
+let ballX = canvas.width / 2;
+let ballY = canvas.height / 2;
+let ballSpeedX = 5;
+let ballSpeedY = 3;
+
+let paddleLeftY = canvas.height / 2 - paddleHeight / 2;
+let paddleRightY = canvas.height / 2 - paddleHeight / 2;
+let paddleSpeed = 30;
+
+// Controle das raquetes (teclas)
+let upPressed = false;
+let downPressed = false;
+
+// Função para desenhar a bola
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.closePath();
+}
+
+// Função para desenhar as raquetes
+function drawPaddles() {
+    // Raquete esquerda
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, paddleLeftY, paddleWidth, paddleHeight);
+
+    // Raquete direita
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(canvas.width - paddleWidth, paddleRightY, paddleWidth, paddleHeight);
+}
+
+// Função para movimentar a bola
+function moveBall() {
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Colisão com as paredes superior e inferior
+    if (ballY + ballRadius > canvas.height || ballY - ballRadius < 0) {
+        ballSpeedY = -ballSpeedY;
+    }
+
+    // Colisão com as raquetes
+    if (ballX - ballRadius < paddleWidth && ballY > paddleLeftY && ballY < paddleLeftY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+    }
+    if (ballX + ballRadius > canvas.width - paddleWidth && ballY > paddleRightY && ballY < paddleRightY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+    }
+
+    // Se a bola sair pela esquerda ou direita, reiniciar a bola no centro
+    if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
+        resetBall();
+    }
+}
+
+// Função para resetar a bola para o centro
+function resetBall() {
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
+    ballSpeedX = -ballSpeedX;
+    ballSpeedY = 3;
+}
+
+// Função para mover as raquetes
+function movePaddles() {
+    if (upPressed && paddleLeftY > 0) {
+        paddleLeftY -= paddleSpeed;
+    }
+    if (downPressed && paddleLeftY < canvas.height - paddleHeight) {
+        paddleLeftY += paddleSpeed;
+    }
+    if (upPressed && paddleRightY > 0) {
+        paddleRightY -= paddleSpeed;
+    }
+    if (downPressed && paddleRightY < canvas.height - paddleHeight) {
+        paddleRightY += paddleSpeed;
+    }
+}
+
+// Função para controlar as teclas pressionadas
+function keyDownHandler(e) {
+    if (e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = true;
+    } else if (e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = true;
+    }
+}
+
+function keyUpHandler(e) {
+    if (e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = false;
+    } else if (e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = false;
+    }
+}
+
+// Função para atualizar o jogo
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBall();
+    drawPaddles();
+    moveBall();
+    movePaddles();
+
+    requestAnimationFrame(draw);
+}
+
+// Adicionar event listeners para controle
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+// Iniciar o jogo
+draw();
